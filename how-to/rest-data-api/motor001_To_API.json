@@ -1,0 +1,127 @@
+{
+	"productInfo": {
+		"company": "HighByte",
+		"product": "IntelligenceHub",
+		"version": "4.3.0",
+		"build": "2025.10.24.318",
+		"stage": "Release"
+	},
+	"project": {
+		"version": 12,
+		"connections": [],
+		"inputs": [],
+		"outputs": [],
+		"modeling": {
+			"models": [],
+			"instances": []
+		},
+		"conditions": [],
+		"functions": [],
+		"tags": [],
+		"pipelines": [
+			{
+				"name": "motor001_to_API",
+				"tags": [
+					"starter_solution"
+				],
+				"inputStages": [
+					"ReadMotor001"
+				],
+				"stages": [
+					{
+						"name": "To_MQTT_Log_API",
+						"display": {
+							"position": {
+								"x": 690,
+								"y": -67
+							}
+						},
+						"config": {
+							"type": ".DynamicWriteConfig",
+							"failureOutputs": [],
+							"connectionReference": "{{Connection.mqtt}}",
+							"qualifier": {
+								"topic": "logAPI/{{event.value.site}}/{{event.value.area}}/{{event.value.line}}/assets/motors/{{event.value.motorId}} ",
+								"qos": 0,
+								"namedRoot": false,
+								"retained": false,
+								"breakupArrays": false,
+								"filterList": [
+									"_name",
+									"_model"
+								],
+								"type": "Tag"
+							},
+							"qualifierExpression": "",
+							"writeReturn": "ignore"
+						},
+						"outputs": []
+					},
+					{
+						"name": "ReadMotor001",
+						"display": {
+							"position": {
+								"x": 240,
+								"y": 0
+							}
+						},
+						"config": {
+							"type": ".ReadConfig",
+							"failureOutputs": [],
+							"reference": {
+								"type": "Instance",
+								"name": "motor001",
+								"path": "",
+								"params": {}
+							}
+						},
+						"outputs": [
+							"To_MQTT_Log_API",
+							"ReturnRestRequest"
+						]
+					},
+					{
+						"name": "ReturnRestRequest",
+						"display": {
+							"position": {
+								"x": 690,
+								"y": 67
+							}
+						},
+						"config": {
+							"type": ".ReturnConfig"
+						},
+						"outputs": []
+					}
+				],
+				"trackActivity": true,
+				"triggers": [
+					{
+						"name": "APITrigger",
+						"display": {
+							"position": {
+								"x": -450,
+								"y": 45
+							}
+						},
+						"config": {
+							"type": ".TriggerApi",
+							"enabled": true,
+							"parameters": {
+								"type": "EmptyParameters"
+							}
+						}
+					}
+				],
+				"errorHandler": {
+					"type": "default"
+				}
+			}
+		],
+		"namespace": []
+	},
+	"network": {
+		"groups": [],
+		"hubs": []
+	}
+}
