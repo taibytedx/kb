@@ -4,38 +4,38 @@
 
 ### What This Article Covers
 
-This article explains how Intelligence Hub handles numeric typing when:
+This article explains how Intelligence Hub handles data types when:
 
--   Reading plain JSON over MQTT
--   Reading typed payloads
+-   Reading typed payloads (OPC-UA)
+-   Reading plain JSON (MQTT)
 -   Writing to SQL Outputs
--   Writing to OPC UA tags 
+-   Writing to OPC UA
+-   Handling in Pipeline
 
 ### Summary of Behavior
 
-When reading a numeric value from plain JSON over MQTT, the payload does not explicitly say "float vs double" the way an OPC UA connection will. When writing that value to OPC UA, Intelligence Hub will cast the value to the OPC UA tag's data type at write time. A double value in a JSON payload will maintain precision when writing to a double in OPC UA, but will lose precision if written to a float. JSON numerics are implicitly handled as Real64 type unless specified in the Model definition, so it will be casted to its mapped type at the target system if it is being instantiated (i.e. creating a column in a table and setting its type).
+When reading a value from JSON over MQTT, the payload does not specify its type like float, double, etc. like the way an OPC UA connection can, so its type will be derived from the value. When writing that value to OPC UA, Intelligence Hub will cast the value to the OPC UA tag's cached data type. A double value in a JSON payload will maintain precision when writing to a double in OPC UA, but will lose precision if written to a less precise type like float. JSON values are implicitly handled unless specified in a Model definition and if the data is being instantiated at the target then it will be typecasted according to the native Intelligence Hub mapping table (i.e. creating a column in a table and setting its type. An example of this type mapping for writing to SQL is found **[here](https://guide.highbyte.com/configuration/connect/connections/sql/microsoft_sql_server/#create-table)**.
 
-### How Intelligence Hub Assigns Types at Ingestion
+### How Intelligence Hub Assigns Types at Input and Output
 
-If an input includes typed data, Intelligence Hub converts them to its own native types at ingestion and keeps those types associated with the payload in its schema.
+If an input includes typed data, Intelligence Hub converts them to its own native types at input and keeps those types associated with the payload object and its underlying schema.
 
 -   Example: OPC UA branch read > Postgres create table
     -   Image 1: Reads multiple OPC UA types via a branch read
-    -   Image 2: Writes the object from Postgres using "create table"
-    -   Image 3: The resulting Postgres Column types reflects OPC UA types
+    -   Image 2: Writes the Component object reference to Postgres using "create table"
+    -   Image 3: The resulting Postgres column types are respected by OPC UA types
 
- ![opcua branch read on various types](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/opcua%20branch%20read%20on%20various%20types.png)
+![opcua branch read on various types](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/opcua%20branch%20read%20on%20various%20types.png)
 
 ![doing test write refrencing that input componene to create a new table in postghres](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/doing%20test%20write%20refrencing%20that%20input%20componene%20to%20create%20a%20new%20table%20in%20postghres.png)  
   
-
 ![postgres column types reflect the OPC UA types](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/postgres%20column%20types%20reflect%20the%20OPC%20UA%20types.png)
 
-If the Input is plain JSON over MQTT, types are implicitly derived beyond JSON's single numeric concept 
+### When the Input is JSON from a connection like MQTT, types are implicitly derived: integers map to Int64 and decimals map to Real64
 
 -   Example: MQTT JSON > Postgres create table
-    -   Image 1: The same payload is read as above, but as a plain JSON without the underlying type schema to create the Postgres table 
-    -   Image 2: The object explorer shows that the column types are mainly derived as type Int8 (8-bit Integer)
+    -   Image 1: The same values are read as above and in decimal form, but as a plain JSON without underlying type schema to create the Postgres table 
+    -   Image 2: The object explorer shows that the column types are mainly Int8 (64-bit signed integer) or Float8 (64-bit float)
 
 ###### Test Write expression
 
@@ -59,6 +59,13 @@ payload;
 ```
 
 
+
+### Note: When the JSON is defined with a JS Expression, the type handling is generic and can deviate from how it is mapped from a Connection Input. More info on this further below.
+
+-   Example: Expression JSON > Postgres create table
+    -   Image 1: The same payload is written out as a Test Write Expression to create the Postgres table 
+    -   Image 2: The object explorer shows that the column types are mainly derived as type Int8 (64-bit signed integer)
+    -   
 ![same payload as before as a plain json to create postgres table](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/same%20payload%20as%20before%20as%20a%20plain%20json%20to%20create%20postgres%20table.png)
 
 ![object explorere shows column types were mainely create as Integer](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/object%20explorere%20shows%20column%20types%20were%20mainely%20create%20as%20Integer.png)
@@ -74,14 +81,12 @@ If the destination schema is required to match specific types, [Modeling](https:
 
 ### OPC UA Write Behavior: Double Value Written to a Float Tag
 
-Writing to a double-precision value to an OPC UA Float tag (mapped to OPC UA-native type Real32) will truncate to Float32 precision.
+Writing to a double-precision value to an OPC UA float tag (which maps to the native type Real32) will truncate to 32-bit precision.
 
 -   Image 1:
-    -    Value written: 1.123456789
+    -   Value written: 1.123456789
     -   Destination tage type: Float (Real32)  
         Value stored/read back: 1.1234568
-
-  
 
 ![writing a double value](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/writing%20a%20double%20value.png)
 
@@ -98,8 +103,8 @@ When writing an object structure to OPC UA, each leaf tag is cast independently 
 
 Intelligence Hub can retain datatypes inside a pipeline under certain circumstances. This depends on how the types are established and how object is transformed. Type metadata is retained when native types are established by:
 
--   An input schema
--   An instance
+-   An Input schema
+-   An Instance
 -   A Model Stage 
 
 ### How Types Can Be Lost (Transform Patterns)
