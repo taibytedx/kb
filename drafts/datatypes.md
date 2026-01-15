@@ -1,3 +1,7 @@
+# How HighByte Handles Floating-Point Data when OPC UA only Supports Single Precision Floating Point
+
+## Learn how data types are managed across explicitly defined types like from OPC-UA and implicit types like JSON over MQTT.
+
 ### What This Article Covers
 
 This article explains how Intelligence Hub handles numeric typing when:
