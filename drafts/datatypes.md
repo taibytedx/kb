@@ -33,9 +33,31 @@ If an input includes typed data, Intelligence Hub converts them to its own nati
 
 If the Input is plain JSON over MQTT, types are implicitly derived beyond JSON's single numeric concept 
 
--   Example: MQTT JSON > Postgres create table 
+-   Example: MQTT JSON > Postgres create table
     -   Image 1: The same payload is read as above, but as a plain JSON without the underlying type schema to create the Postgres table 
     -   Image 2: The object explorer shows that the column types are mainly derived as type Int8 (8-bit Integer)
+
+###### Test Write expression
+
+```
+const payload = {
+  "boolean": true,
+  "intDouble": 1,
+  "intDword": 1,
+  "intFloat": 1,
+  "intLong": 1,
+  "intString": "1",
+  "intWord": 1,
+  "floatDouble": 1.0,
+  "floatDword": 1.0,
+  "floatFloat": 1.0,
+  "floatLong": 1.0,
+  "floatString": "1.0",
+  "floatWord": 1.0
+};
+payload;
+```
+
 
 ![same payload as before as a plain json to create postgres table](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/same%20payload%20as%20before%20as%20a%20plain%20json%20to%20create%20postgres%20table.png)
 
