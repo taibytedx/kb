@@ -1,4 +1,4 @@
-# How HighByte Handles Floating-Point Data when OPC UA only Supports Single Precision Floating Point
+# How Intelligence Hub handles data types
 
 ## Learn how data types are managed across explicitly defined types like from OPC-UA and implicit types like JSON over MQTT.
 
@@ -13,7 +13,7 @@ This article explains how Intelligence Hub handles numeric typing when:
 
 ### Summary of Behavior
 
-When reading a numeric value from plain JSON over MQTT, the payload does not explicitly say "float vs double" the way an OPC UA connection will. When writing that value to OPC UA, Intelligence Hub will cast the value to the OPC UA tag's data type at write time. Therefore, Intelligence Hub reads “generic number” from JSON and forces it into a smaller, less precise numeric type (Real32), so the system may truncate it to what that smaller type can store.
+When reading a numeric value from plain JSON over MQTT, the payload does not explicitly say "float vs double" the way an OPC UA connection will. When writing that value to OPC UA, Intelligence Hub will cast the value to the OPC UA tag's data type at write time. A double value in a JSON payload will maintain precision when writing to a double in OPC UA, but will lose precision if written to a float. JSON numerics are implicitly handled as Real64 type unless specified in the Model definition, so it will be casted to its mapped type at the target system if it is being instantiated (i.e. creating a column in a table and setting its type).
 
 ### How Intelligence Hub Assigns Types at Ingestion
 
@@ -21,7 +21,7 @@ If an input includes typed data, Intelligence Hub converts them to its own nati
 
 -   Example: OPC UA branch read > Postgres create table
     -   Image 1: Reads multiple OPC UA types via a branch read
-    -   Image 2: Writes the object from Postgres using "create table" 
+    -   Image 2: Writes the object from Postgres using "create table"
     -   Image 3: The resulting Postgres Column types reflects OPC UA types
 
  ![opcua branch read on various types](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/opcua%20branch%20read%20on%20various%20types.png)
@@ -41,7 +41,7 @@ If the Input is plain JSON over MQTT, types are implicitly derived beyond JSON's
 
 ![object explorere shows column types were mainely create as Integer](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/object%20explorere%20shows%20column%20types%20were%20mainely%20create%20as%20Integer.png)
 
-###  How Outputs Choose or Enforce Types 
+### How Outputs Choose or Enforce Types 
 
 When writing to a destination:
 
@@ -82,7 +82,7 @@ Intelligence Hub can retain datatypes inside a pipeline under certain circumsta
 
 ### How Types Can Be Lost (Transform Patterns)
 
-A Transform does not necessarily remove type information. If the same _event.value_ object is modified, datatypes are retained. However, if the _event.value_ object is completely replaced, datat type information is lost. So a transform stage can modify the value of a property, add new properties or delete them. But when new properties are added, there isn't a way to explicitly set the type for that property directly in the transform stage.
+A Transform does not necessarily remove type information. If the same _event.value_ object is modified, datatypes are retained. However, if the _event.value_ object is completely replaced, data type information is lost. So a transform stage can modify the value of a property, add new properties or delete them. But when new properties are added, there isn't a way to explicitly set the type for that property directly in the Transform stage.
 
 [The Model Stage](https://guide.highbyte.com/configuration/pipeline/stages/common/model/) may be used to explicitly set attribute properties. Then, _event.metadata_ may be adjusted, but this will not affect the object that _event.value_ is referencing.  
   
