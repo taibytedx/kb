@@ -14,7 +14,7 @@ This article explains how Intelligence Hub handles data types when:
 
 ### Summary of Behavior
 
-When reading a value from JSON over MQTT, the payload does not specify its type like float, double, etc. like the way an OPC UA connection can, so its type will be derived from the value. When writing that value to OPC UA, Intelligence Hub will cast the value to the OPC UA tag's cached data type. A double value in a JSON payload will maintain precision when writing to a double in OPC UA, but will lose precision if written to a less precise type like float. JSON values are implicitly handled unless specified in a Model definition and if the data is being instantiated at the target then it will be typecasted according to the native Intelligence Hub mapping table (i.e. creating a column in a table and setting its type. An example of this type mapping for writing to SQL is found **[here](https://guide.highbyte.com/configuration/connect/connections/sql/microsoft_sql_server/#create-table)**.
+When reading a value from JSON over MQTT, the payload does not specify its type like float, double, etc. like the way an OPC UA connection can, so its type will be derived from the value. When writing that value to OPC UA, Intelligence Hub will cast the value to the OPC UA tag's cached data type. A double value in a JSON payload will maintain precision when writing to a double in OPC UA, but will lose precision if written to a less precise type like float. JSON values are implicitly handled unless specified in a Model definition and if the data is being instantiated at the target then it will be typecasted according to the native Intelligence Hub mapping table (i.e. creating a column in a table and setting its type. An example of this type mapping for writing to SQL is found [**here**](https://guide.highbyte.com/configuration/connect/connections/sql/microsoft_sql_server/#create-table)).
 
 ### How Intelligence Hub Assigns Types at Input and Output
 
@@ -101,7 +101,7 @@ When writing an object structure to OPC UA, each leaf tag is cast independently 
 
 ### Retaining Numeric Types Inside the Pipeline
 
-Intelligence Hub can retain datatypes inside a pipeline under certain circumstances. This depends on how the types are established and how object is transformed. Type metadata is retained when native types are established by:
+Intelligence Hub can retain data types inside a pipeline under certain circumstances. This depends on how the types are established and how object is transformed. Type metadata is retained when native types are established by:
 
 -   An Input schema
 -   An Instance
@@ -109,7 +109,7 @@ Intelligence Hub can retain datatypes inside a pipeline under certain circumsta
 
 ### How Types Can Be Lost (Transform Patterns)
 
-A Transform does not necessarily remove type information. If the same _event.value_ object is modified, datatypes are retained. However, if the _event.value_ object is completely replaced, data type information is lost. So a transform stage can modify the value of a property, add new properties or delete them. But when new properties are added, there isn't a way to explicitly set the type for that property directly in the Transform stage.
+A Transform does not necessarily remove type information. If the same _event.value_ object is modified, data types are retained. However, if the _event.value_ object is completely replaced, data type information is lost. So a transform stage can modify the value of a property, add new properties or delete them. But when new properties are added, there isn't a way to explicitly set the type for that property directly in the Transform stage.
 
 [The Model Stage](https://guide.highbyte.com/configuration/pipeline/stages/common/model/) may be used to explicitly set attribute properties. Then, _event.metadata_ may be adjusted, but this will not affect the object that _event.value_ is referencing.  
   
