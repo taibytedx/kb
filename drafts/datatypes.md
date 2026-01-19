@@ -43,7 +43,8 @@ When the Input is JSON from a connection like MQTT, types are implicitly derived
 {
   "boolean": true,
   "int": 1,
-  "float": 1.0,
+  "float1p0": 1.0,
+  "float1p1": 1.1,
   "string": "1"
 }
 ```
