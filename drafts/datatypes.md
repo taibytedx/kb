@@ -38,7 +38,7 @@ If an input includes typed data, Intelligence Hub converts them to its own nati
     -   Image 2: Captured using MQTT Input
     -   Image 3: The JSON data types are implicitly derived and mapped to the native types and published out to create a Postgres table
     -   Image 4: The object explorer shows that the column types are mainly Int8 (64-bit signed integer) or Float8 (64-bit float)
-l
+
 **UNS Client Publish**
 ```
 {
@@ -59,6 +59,18 @@ l
 -   Example: Expression JSON > Postgres create table
     -   Image 1: The same payload is written out as a Test Write Expression to create the Postgres table 
     -   Image 2: The object explorer shows how 1.0 was truncated to 1 as Int8 (64-bit signed integer), but 1.1 was mapped as float8 (64-bit float)
+
+**Test Write Expression**
+```
+const payload = {
+  "boolean": true,
+  "int": 1,
+  "float1p0": 1.0,
+  "float1p1": 1.1,
+  "string": "1"
+}; 
+payload;
+```
 
 <img width="1171" height="639" alt="image" src="https://github.com/user-attachments/assets/bf7a7dc7-13a9-46b9-8948-c6f2198adab8" />
 <img width="1160" height="969" alt="image" src="https://github.com/user-attachments/assets/dd6eff06-86a5-416c-b2a3-72f343670ede" />
