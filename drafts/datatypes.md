@@ -34,41 +34,34 @@ If an input includes typed data, Intelligence Hub converts them to its own nati
 ### When the Input is JSON from a connection like MQTT, types are implicitly derived: integers map to Int64 and decimals map to Real64
 
 -   Example: MQTT JSON > Postgres create table
-    -   Image 1: The same values are read as above and in decimal form, but as a plain JSON without underlying type schema to create the Postgres table 
-    -   Image 2: The object explorer shows that the column types are mainly Int8 (64-bit signed integer) or Float8 (64-bit float)
-
-###### Test Write expression
-
+    -   Image 1: The object expression is published into MQTT using UNS Client
+    -   Image 2: Captured using MQTT Input
+    -   Image 3: The JSON data types are implicitly derived and mapped to the native types and published out to create a Postgres table
+    -   Image 4: The object explorer shows that the column types are mainly Int8 (64-bit signed integer) or Float8 (64-bit float)
+l
+**UNS Client Publish**
 ```
-const payload = {
+{
   "boolean": true,
-  "intDouble": 1,
-  "intDword": 1,
-  "intFloat": 1,
-  "intLong": 1,
-  "intString": "1",
-  "intWord": 1,
-  "floatDouble": 1.0,
-  "floatDword": 1.0,
-  "floatFloat": 1.0,
-  "floatLong": 1.0,
-  "floatString": "1.0",
-  "floatWord": 1.0
-};
-payload;
+  "int": 1,
+  "float": 1.0,
+  "string": "1"
+}
 ```
 
+<img width="945" height="749" alt="image" src="https://github.com/user-attachments/assets/961a2a2e-5643-4b1c-b243-01f556023a5d" />
+<img width="1162" height="719" alt="image" src="https://github.com/user-attachments/assets/258b6a70-0c18-4fe3-9436-c10437c6b72b" />
+<img width="1879" height="751" alt="image" src="https://github.com/user-attachments/assets/72345318-cc6b-43ed-baec-5929c07ab755" />
+<img width="1153" height="971" alt="image" src="https://github.com/user-attachments/assets/3c7f1b31-de90-4cda-8bca-6b3c161fdebb" />
 
-
-### Note: When the JSON is defined with a JS Expression, the type handling is generic and can deviate from how it is mapped from a Connection Input. More info on this further below.
+### Note: When the JSON is defined with a JS object Expression, the type handling is generic and can deviate from how it gets mapped from a Connection Input. More info on this further below.
 
 -   Example: Expression JSON > Postgres create table
     -   Image 1: The same payload is written out as a Test Write Expression to create the Postgres table 
-    -   Image 2: The object explorer shows that the column types are mainly derived as type Int8 (64-bit signed integer)
-    -   
-![same payload as before as a plain json to create postgres table](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/same%20payload%20as%20before%20as%20a%20plain%20json%20to%20create%20postgres%20table.png)
+    -   Image 2: The object explorer shows how 1.0 was truncated to 1 as Int8 (64-bit signed integer), but 1.1 was mapped as float8 (64-bit float)
 
-![object explorere shows column types were mainely create as Integer](https://5505680.fs1.hubspotusercontent-na1.net/hubfs/5505680/object%20explorere%20shows%20column%20types%20were%20mainely%20create%20as%20Integer.png)
+<img width="1171" height="639" alt="image" src="https://github.com/user-attachments/assets/bf7a7dc7-13a9-46b9-8948-c6f2198adab8" />
+<img width="1160" height="969" alt="image" src="https://github.com/user-attachments/assets/dd6eff06-86a5-416c-b2a3-72f343670ede" />
 
 ### How Outputs Choose or Enforce Types 
 
@@ -77,7 +70,7 @@ When writing to a destination:
 -   If the destination has defined types (e.g., existing SQL table, OPC UA tags), Intelligence Hub casts values to match those types. 
 -   If the destination has no types yet (create table), Intelligence Hub assigns types based on native typing or derived values. 
 
-If the destination schema is required to match specific types, [Modeling](https://guide.highbyte.com/configuration/model/models/) is often able to define the necessary types. Otherwise, a value like 123 may become an Integer, which can cause trouble later if the next value is 123.1 and gets casted or truncated. For OPC UA writes this is usually not a problem because tag types are predefined.
+If the destination schema is required to match specific types, [Modeling](https://guide.highbyte.com/configuration/model/models/) is often able to define the necessary types. Otherwise, a value like 123 and 123.0 may become an Integer, which can cause trouble later if the next value is 123.1 and gets miscasted or truncated to 123. For writes to systems like OPC UA this is usually not a problem since tag types that are predefined.
 
 ### OPC UA Write Behavior: Double Value Written to a Float Tag
 
