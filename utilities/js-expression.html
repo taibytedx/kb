@@ -1,0 +1,79 @@
+<style>
+#js-playground {
+  position: absolute;
+  top: 900px; /* Adjust this pixel value to position mid-article */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 800px;
+  z-index: 1000;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+@media (max-width: 768px) {
+  #js-playground {
+    position: static;
+    margin: 20px auto;
+    transform: none;
+  }
+}
+</style>
+
+<div id="js-playground" style="border:1px solid #ccc; padding:15px; margin:20px 0; border-radius:8px; font-family:monospace;">
+  <h4>JS Expression Editor</h4>
+  <textarea id="code-input" rows="6" cols="60" style="width:100%; font-family:monospace; font-size:14px;" 
+    placeholder="Try: for (const el of ['a','b','c']) console.log(el);">const array = ["a", "b", "c"];
+for (const element of array) {
+  console.log(element);
+}</textarea><br>
+  <button onclick="executeCode()" style="padding:8px 16px; margin:5px; background:#007cba; color:white; border:none; border-radius:4px; cursor:pointer;">Run Code</button>
+  <button onclick="clearOutput()" style="padding:8px 16px; margin:5px; background:#6c757d; color:white; border:none; border-radius:4px; cursor:pointer;">Clear</button>
+  <div id="output" style="background:#f8f9fa; padding:10px; margin-top:10px; min-height:100px; border-radius:4px; white-space:pre-wrap; font-family:monospace; font-size:13px;"></div>
+</div>
+
+<script>
+let capturedLogs = [];
+const originalConsoleLog = console.log;
+
+function executeCode() {
+  const code = document.getElementById('code-input').value;
+  const output = document.getElementById('output');
+  
+  // Reset console capture
+  capturedLogs = [];
+  console.log = (...args) => {
+    capturedLogs.push(args.map(arg => String(arg)).join(' '));
+  };
+  
+  output.innerHTML = 'Running...';
+  
+  try {
+    // Create isolated function scope (safer than direct eval)
+    const func = new Function(`
+      ${code};
+      return 'Code executed successfully';
+    `);
+    func();
+    
+    // Restore original console
+    console.log = originalConsoleLog;
+    
+    // Display captured output
+    if (capturedLogs.length > 0) {
+      output.textContent = capturedLogs.join('\n');
+    } else {
+      output.textContent = 'Code ran successfully - no console.log output';
+    }
+  } catch (error) {
+    console.log = originalConsoleLog;
+    output.innerHTML = `<span style="color:#dc3545;">Error: ${error.message}</span>`;
+  }
+}
+
+function clearOutput() {
+  document.getElementById('output').textContent = '';
+}
+
+// Auto-run on page load
+window.addEventListener('load', () => executeCode());
+</script>
