@@ -75,4 +75,3 @@ Both errors are encryption-related startup failures tied to certificate manageme
 
 ***
 
-Would you like me to include a **root cause analysis diagram** (e.g., a simple Mermaid diagram showing where the decryption chain breaks)?
