@@ -39,7 +39,7 @@ When the Input is JSON from a connection like MQTT, types are implicitly derived
 -   Image 4: The object explorer shows that the column types are mainly Int8 (64-bit signed integer) or Float8 (64-bit float)
 
 **UNS Client Publish**
-```
+```json
 {
   "boolean": true,
   "int": 1,
