@@ -1,0 +1,1114 @@
+{
+	"productInfo": {
+		"company": "HighByte",
+		"product": "IntelligenceHub",
+		"version": "4.3.3",
+		"build": "2026.1.5.1",
+		"stage": "Release"
+	},
+	"project": {
+		"version": 12,
+		"connections": [
+			{
+				"name": "MQTT",
+				"uri": "mqtt://localhost:1885",
+				"tags": [
+					"Adv_UNS",
+					"eventBasedPipeline"
+				],
+				"writes": {
+					"flattenModeledValues": false
+				},
+				"subscriptions": {},
+				"storeForward": {
+					"enabled": false,
+					"maxEntries": 100,
+					"waitOnFailureInterval": {
+						"duration": 1,
+						"units": "Seconds"
+					}
+				},
+				"settings": {
+					"connectionTimeoutSeconds": 10,
+					"keepAliveSeconds": 60,
+					"requestTimeoutMS": 5000,
+					"cleanSession": true,
+					"ssl": false,
+					"redundantBrokers": [],
+					"inputDiscovery": ""
+				}
+			},
+			{
+				"name": "OPC_UA",
+				"uri": "opc.tcp://52.10.6.4:49320",
+				"tags": [
+					"Adv_UNS",
+					"eventBasedPipeline"
+				],
+				"writes": {
+					"flattenModeledValues": false
+				},
+				"subscriptions": {
+					"subscriptionRate": {
+						"duration": 1,
+						"units": "Seconds"
+					}
+				},
+				"storeForward": {
+					"enabled": false,
+					"maxEntries": 100,
+					"waitOnFailureInterval": {
+						"duration": 1,
+						"units": "Seconds"
+					}
+				},
+				"settings": {
+					"security": "None",
+					"authentication": {
+						"type": "Anonymous"
+					},
+					"connectTimeoutSeconds": 5,
+					"requestTimeoutMS": 5000,
+					"maxItemsPerRead": 512,
+					"maxItemsPerWrite": 256,
+					"sessionName": "",
+					"identifierMode": "NodeId"
+				}
+			},
+			{
+				"name": "SQL_CMMS",
+				"uri": "jdbc.sqlserver://52.10.6.4:1433",
+				"tags": [
+					"Adv_UNS",
+					"eventBasedPipeline"
+				],
+				"writes": {
+					"flattenModeledValues": false
+				},
+				"subscriptions": {},
+				"storeForward": {
+					"enabled": false,
+					"maxEntries": 100,
+					"waitOnFailureInterval": {
+						"duration": 1,
+						"units": "Seconds"
+					}
+				},
+				"settings": {
+					"database": "serviceinfo",
+					"username": "highbyte",
+					"strategy": {
+						"type": "default"
+					},
+					"connectString": "password=password"
+				}
+			}
+		],
+		"inputs": [
+			{
+				"name": "Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_All_Templated",
+				"connection": "OPC_UA",
+				"type": "opc.tcp",
+				"qualifier": {
+					"type": "Tag",
+					"dataType": "Int16",
+					"samplingInterval": {
+						"duration": 0,
+						"units": "Seconds"
+					},
+					"identifier": {
+						"type": "NodeId",
+						"namespaceIndex": "2",
+						"identifierType": "String",
+						"value": "Tutorial.CNC_{{this.AssetID}}.{{this.eventType}}"
+					},
+					"isComplex": true
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"name": "{{this.AssetID}}_{{this.metric}}",
+					"type": "Static",
+					"params": [
+						{
+							"name": "AssetID",
+							"pattern": "Fanuc_1001*5,Fanuc_1002*5,Fanuc_1003*5"
+						},
+						{
+							"name": "eventType",
+							"pattern": "PartProgramID,ToolID,MachineState,ProductionCount,RejectCount,PartProgramID,ToolID,MachineState,ProductionCount,RejectCount,PartProgramID,ToolID,MachineState,ProductionCount,RejectCount"
+						}
+					],
+					"reference": "{{Connection.SQL_CMMS.All_CNC_Machines_AssetIDs_ToolID}}"
+				},
+				"parameters": {
+					"type": "EmptyParameters"
+				}
+			},
+			{
+				"name": "Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_MachineState_Templated",
+				"connection": "OPC_UA",
+				"type": "opc.tcp",
+				"qualifier": {
+					"type": "Tag",
+					"dataType": "Int16",
+					"samplingInterval": {
+						"duration": 0,
+						"units": "Seconds"
+					},
+					"identifier": {
+						"type": "NodeId",
+						"namespaceIndex": "2",
+						"identifierType": "String",
+						"value": "Tutorial.CNC_{{this.AssetID}}.MachineState"
+					},
+					"isComplex": true
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"name": "{{this.AssetID}}",
+					"type": "Dynamic",
+					"reference": "{{Connection.SQL_CMMS.All_CNC_Machines_AssetIDs_MachineState}}"
+				},
+				"parameters": {
+					"type": "inline",
+					"model": {
+						"name": "params",
+						"tags": [],
+						"attributes": [
+							{
+								"attributeType": "Internal",
+								"name": "AssetID",
+								"nullable": false,
+								"required": false,
+								"array": false,
+								"defaultValue": "{{this.AssetID}}",
+								"internalType": "String"
+							}
+						]
+					}
+				}
+			},
+			{
+				"name": "Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_PartProgramID_Templated",
+				"connection": "OPC_UA",
+				"type": "opc.tcp",
+				"qualifier": {
+					"type": "Tag",
+					"dataType": "Int16",
+					"samplingInterval": {
+						"duration": 0,
+						"units": "Seconds"
+					},
+					"identifier": {
+						"type": "NodeId",
+						"namespaceIndex": "2",
+						"identifierType": "String",
+						"value": "Tutorial.CNC_{{this.AssetID}}.PartProgramID"
+					},
+					"isComplex": true
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"name": "{{this.AssetID}}",
+					"type": "Dynamic",
+					"params": [
+						{
+							"name": "AssetID",
+							"pattern": "Fanuc_1001"
+						}
+					],
+					"reference": "{{Connection.SQL_CMMS.All_CNC_Machines_AssetIDs_PartProgramID}}"
+				},
+				"parameters": {
+					"type": "inline",
+					"model": {
+						"name": "params",
+						"tags": [],
+						"attributes": [
+							{
+								"attributeType": "Internal",
+								"name": "AssetID",
+								"nullable": false,
+								"required": false,
+								"array": false,
+								"defaultValue": "Fanuc_1001",
+								"internalType": "String"
+							}
+						]
+					}
+				}
+			},
+			{
+				"name": "Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_ProductionCount_Templated",
+				"connection": "OPC_UA",
+				"type": "opc.tcp",
+				"qualifier": {
+					"type": "Tag",
+					"dataType": "Int16",
+					"samplingInterval": {
+						"duration": 0,
+						"units": "Seconds"
+					},
+					"identifier": {
+						"type": "NodeId",
+						"namespaceIndex": "2",
+						"identifierType": "String",
+						"value": "Tutorial.CNC_{{this.AssetID}}.ProductionCount"
+					},
+					"isComplex": true
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"name": "{{this.AssetID}}",
+					"type": "Dynamic",
+					"params": [
+						{
+							"name": "AssetID",
+							"pattern": "Fanuc_1001"
+						}
+					],
+					"reference": "{{Connection.SQL_CMMS.All_CNC_Machines_AssetIDs_ProductionCount}}"
+				},
+				"parameters": {
+					"type": "inline",
+					"model": {
+						"name": "params",
+						"tags": [],
+						"attributes": [
+							{
+								"attributeType": "Internal",
+								"name": "AssetID",
+								"nullable": false,
+								"required": false,
+								"array": false,
+								"defaultValue": "Fanuc_1001",
+								"internalType": "String"
+							}
+						]
+					}
+				}
+			},
+			{
+				"name": "Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_RejectCount_Templated",
+				"connection": "OPC_UA",
+				"type": "opc.tcp",
+				"qualifier": {
+					"type": "Tag",
+					"dataType": "Int16",
+					"samplingInterval": {
+						"duration": 0,
+						"units": "Seconds"
+					},
+					"identifier": {
+						"type": "NodeId",
+						"namespaceIndex": "2",
+						"identifierType": "String",
+						"value": "Tutorial.CNC_{{this.AssetID}}.RejectCount"
+					},
+					"isComplex": true
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"name": "{{this.AssetID}}",
+					"type": "Dynamic",
+					"params": [
+						{
+							"name": "AssetID",
+							"pattern": "Fanuc_1001"
+						}
+					],
+					"reference": "{{Connection.SQL_CMMS.All_CNC_Machines_AssetIDs_RejectCount}}"
+				},
+				"parameters": {
+					"type": "inline",
+					"model": {
+						"name": "params",
+						"tags": [],
+						"attributes": [
+							{
+								"attributeType": "Internal",
+								"name": "AssetID",
+								"nullable": false,
+								"required": false,
+								"array": false,
+								"defaultValue": "Fanuc_1001",
+								"internalType": "String"
+							}
+						]
+					}
+				}
+			},
+			{
+				"name": "Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_ToolID_Templated",
+				"connection": "OPC_UA",
+				"type": "opc.tcp",
+				"qualifier": {
+					"type": "Tag",
+					"dataType": "Int16",
+					"samplingInterval": {
+						"duration": 0,
+						"units": "Seconds"
+					},
+					"identifier": {
+						"type": "NodeId",
+						"namespaceIndex": "2",
+						"identifierType": "String",
+						"value": "Tutorial.CNC_{{this.AssetID}}.ToolID"
+					},
+					"isComplex": true
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"name": "{{this.AssetID}}",
+					"type": "Dynamic",
+					"params": [
+						{
+							"name": "AssetID",
+							"pattern": "Fanuc_1001"
+						}
+					],
+					"reference": "{{Connection.SQL_CMMS.All_CNC_Machines_AssetIDs_ToolID}}"
+				},
+				"parameters": {
+					"type": "inline",
+					"model": {
+						"name": "params",
+						"tags": [],
+						"attributes": [
+							{
+								"attributeType": "Internal",
+								"name": "AssetID",
+								"nullable": false,
+								"required": false,
+								"array": false,
+								"defaultValue": "Fanuc_1001",
+								"internalType": "String"
+							}
+						]
+					}
+				}
+			},
+			{
+				"name": "All_CNC_Machines_AssetIDs",
+				"connection": "SQL_CMMS",
+				"type": "jdbc.sqlserver",
+				"qualifier": {
+					"query": "SELECT \n  [dbo].[cmms_servicelogs].[asset_id] AS 'AssetID'\n  --,'MachineState' AS 'eventType'\nFROM \n  [dbo].[cmms_servicelogs] \nWHERE \n  [dbo].[cmms_servicelogs].[asset_type] = 'CNC'",
+					"type": "query",
+					"index": {
+						"enabled": false,
+						"indexName": "",
+						"indexValue": ""
+					}
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"type": "Off"
+				},
+				"parameters": {
+					"type": "EmptyParameters"
+				}
+			},
+			{
+				"name": "All_CNC_Machines_AssetIDs_MachineState",
+				"connection": "SQL_CMMS",
+				"type": "jdbc.sqlserver",
+				"qualifier": {
+					"query": "SELECT \n  [dbo].[cmms_servicelogs].[asset_id] AS 'AssetID'\n  ,'MachineState' AS 'eventType'\nFROM \n  [dbo].[cmms_servicelogs] \nWHERE \n  [dbo].[cmms_servicelogs].[asset_type] = 'CNC'",
+					"type": "query",
+					"index": {
+						"enabled": false,
+						"indexName": "",
+						"indexValue": ""
+					}
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"type": "Off"
+				},
+				"parameters": {
+					"type": "EmptyParameters"
+				}
+			},
+			{
+				"name": "All_CNC_Machines_AssetIDs_PartProgramID",
+				"connection": "SQL_CMMS",
+				"type": "jdbc.sqlserver",
+				"qualifier": {
+					"query": "SELECT \n  [dbo].[cmms_servicelogs].[asset_id] AS 'AssetID'\n  ,'PartProgramID' AS 'eventType'\nFROM \n  [dbo].[cmms_servicelogs] \nWHERE \n  [dbo].[cmms_servicelogs].[asset_type] = 'CNC'",
+					"type": "query",
+					"index": {
+						"enabled": false,
+						"indexName": "",
+						"indexValue": ""
+					}
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"type": "Off"
+				},
+				"parameters": {
+					"type": "EmptyParameters"
+				}
+			},
+			{
+				"name": "All_CNC_Machines_AssetIDs_ProductionCount",
+				"connection": "SQL_CMMS",
+				"type": "jdbc.sqlserver",
+				"qualifier": {
+					"query": "SELECT \n  [dbo].[cmms_servicelogs].[asset_id] AS 'AssetID'\n  ,'ProductionCount' AS 'eventType'\nFROM \n  [dbo].[cmms_servicelogs] \nWHERE \n  [dbo].[cmms_servicelogs].[asset_type] = 'CNC'",
+					"type": "query",
+					"index": {
+						"enabled": false,
+						"indexName": "",
+						"indexValue": ""
+					}
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"type": "Off"
+				},
+				"parameters": {
+					"type": "EmptyParameters"
+				}
+			},
+			{
+				"name": "All_CNC_Machines_AssetIDs_RejectCount",
+				"connection": "SQL_CMMS",
+				"type": "jdbc.sqlserver",
+				"qualifier": {
+					"query": "SELECT \n  [dbo].[cmms_servicelogs].[asset_id] AS 'AssetID'\n  ,'RejectCount' AS 'eventType'\nFROM \n  [dbo].[cmms_servicelogs] \nWHERE \n  [dbo].[cmms_servicelogs].[asset_type] = 'CNC'",
+					"type": "query",
+					"index": {
+						"enabled": false,
+						"indexName": "",
+						"indexValue": ""
+					}
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"type": "Off"
+				},
+				"parameters": {
+					"type": "EmptyParameters"
+				}
+			},
+			{
+				"name": "All_CNC_Machines_AssetIDs_ToolID",
+				"connection": "SQL_CMMS",
+				"type": "jdbc.sqlserver",
+				"qualifier": {
+					"query": "SELECT \n  [dbo].[cmms_servicelogs].[asset_id] AS 'AssetID'\n  ,'ToolID' AS 'eventType'\nFROM \n  [dbo].[cmms_servicelogs] \nWHERE \n  [dbo].[cmms_servicelogs].[asset_type] = 'CNC'",
+					"type": "query",
+					"index": {
+						"enabled": false,
+						"indexName": "",
+						"indexValue": ""
+					}
+				},
+				"cacheLifetime": {
+					"enabled": false
+				},
+				"template": {
+					"type": "Off"
+				},
+				"parameters": {
+					"type": "EmptyParameters"
+				}
+			}
+		],
+		"outputs": [],
+		"modeling": {
+			"models": [
+				{
+					"name": "CNC_Machine_Production_Data_Model",
+					"tags": [
+						"Adv_UNS",
+						"eventBasedPipeline"
+					],
+					"attributes": [
+						{
+							"attributeType": "Internal",
+							"name": "AssetID",
+							"nullable": false,
+							"required": false,
+							"array": false,
+							"defaultValue": "mdef",
+							"internalType": "Any"
+						},
+						{
+							"attributeType": "Internal",
+							"name": "ProgramID",
+							"nullable": false,
+							"required": false,
+							"array": false,
+							"defaultValue": "mdef",
+							"internalType": "Any"
+						},
+						{
+							"attributeType": "Internal",
+							"name": "ToolID",
+							"nullable": false,
+							"required": false,
+							"array": false,
+							"defaultValue": "mdef",
+							"internalType": "Any"
+						},
+						{
+							"attributeType": "Internal",
+							"name": "MachineState",
+							"nullable": true,
+							"required": false,
+							"array": false,
+							"defaultValue": "mdef",
+							"internalType": "Any"
+						},
+						{
+							"attributeType": "Internal",
+							"name": "ProductionCount",
+							"nullable": true,
+							"required": false,
+							"array": false,
+							"defaultValue": "mdef",
+							"internalType": "Any"
+						},
+						{
+							"attributeType": "Internal",
+							"name": "RejectCount",
+							"nullable": true,
+							"required": false,
+							"array": false,
+							"internalType": "Any"
+						}
+					]
+				}
+			],
+			"instances": [
+				{
+					"name": "CNC_Solution_CNC_Machine_Production_Data_Templated_Instance",
+					"tags": [
+						"Adv_UNS",
+						"eventBasedPipeline"
+					],
+					"model": "CNC_Machine_Production_Data_Model",
+					"rootValueAs": "Object",
+					"template": {
+						"name": "{{this.AssetID}}",
+						"type": "Dynamic",
+						"reference": "{{Connection.SQL_CMMS.All_CNC_Machines_AssetIDs}}"
+					},
+					"executeMode": "V4",
+					"initExpression": "",
+					"attributes": [
+						{
+							"name": "AssetID",
+							"expression": {
+								"type": "JavaScript",
+								"expression": ""
+							},
+							"defaultValue": "{{this.AssetID}}"
+						},
+						{
+							"name": "ProgramID",
+							"expression": {
+								"type": "JavaScript",
+								"expression": "return {{Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_PartProgramID_Templated({\"AssetID\":\"{{this.AssetID}}\"})}};"
+							}
+						},
+						{
+							"name": "ToolID",
+							"expression": {
+								"type": "JavaScript",
+								"expression": "return {{Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_ToolID_Templated({\"AssetID\":\"{{this.AssetID}}\"})}};"
+							}
+						},
+						{
+							"name": "MachineState",
+							"expression": {
+								"type": "JavaScript",
+								"expression": "return {{Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_MachineState_Templated({\"AssetID\":\"{{this.AssetID}}\"})}};"
+							}
+						},
+						{
+							"name": "ProductionCount",
+							"expression": {
+								"type": "JavaScript",
+								"expression": "return {{Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_ProductionCount_Templated({\"AssetID\":\"{{this.AssetID}}\"})}};"
+							}
+						},
+						{
+							"name": "RejectCount",
+							"expression": {
+								"type": "JavaScript",
+								"expression": "return {{Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_RejectCount_Templated({\"AssetID\":\"{{this.AssetID}}\"})}};"
+							}
+						}
+					],
+					"parameters": {
+						"type": "inline",
+						"model": {
+							"name": "params",
+							"tags": [],
+							"attributes": [
+								{
+									"attributeType": "Internal",
+									"name": "AssetID",
+									"nullable": false,
+									"required": false,
+									"array": false,
+									"internalType": "String"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		"conditions": [],
+		"functions": [],
+		"tags": [
+			{
+				"name": "eventBasedPipeline"
+			}
+		],
+		"pipelines": [
+			{
+				"name": "CNC_Event_Based_Pipeline_Input_Templated",
+				"tags": [
+					"Adv_UNS",
+					"eventBasedPipeline"
+				],
+				"inputStages": [
+					"CheckDebug"
+				],
+				"stages": [
+					{
+						"name": "ParseSourceParameters",
+						"display": {
+							"position": {
+								"x": 1140,
+								"y": 67
+							}
+						},
+						"config": {
+							"type": ".JavaScriptTransformConfig",
+							"transformExpression": "const fullString = event.metadata.source;//\"Connection.OPC_UA.Fanuc_1003(eventSelect=\\\"event\\\",event=\\\"event\\\",AssetID=\\\"Fanuc_1003\\\")\";\r\nconst startIndex = fullString.indexOf(\"(\") + 1;\r\nconst endIndex = fullString.lastIndexOf(\")\");\r\nconst extractedString = fullString.substring(startIndex, endIndex);\r\n//const objString = '{' + extractedString.replace(/=/g, ':').replace(/(\\w+):/g, '\"$1\":') + '}';\r\nconst resultObject = JSON.parse(extractedString);\r\n\r\nstage.setMetadata(\"parameters\",resultObject)\r\n\r\n//const assetIdValue = event.metadata.source.match(/AssetID=\"([^\"]+)\"/)[1];\r\nstage.setValue(event.value);\r\n//stage.setMetadata(\"eventType\",\"AssetID\");"
+						},
+						"outputs": [
+							"ModelEventData"
+						]
+					},
+					{
+						"name": "MergeObj",
+						"display": {
+							"position": {
+								"x": 2940,
+								"y": 67
+							}
+						},
+						"config": {
+							"type": ".JavaScriptTransformConfig",
+							"transformExpression": "//{...instance, ...event};\r\nstage.setValue({...event.value.Source1,...event.value.eventIn});\r\n//stage.setValue({...event.value.eventIn,...event.value.Source1});"
+						},
+						"outputs": [
+							"ModelValidation"
+						]
+					},
+					{
+						"name": "ModelValidation",
+						"display": {
+							"position": {
+								"x": 3390,
+								"y": 67
+							}
+						},
+						"config": {
+							"type": ".ModelValidationConfig",
+							"failureOutputs": [],
+							"models": [
+								"CNC_Machine_Production_Data_Model"
+							],
+							"additionalProperties": "fail"
+						},
+						"outputs": [
+							"MqttPublishPayload"
+						]
+					},
+					{
+						"name": "ReadInstance",
+						"display": {
+							"position": {
+								"x": 2490,
+								"y": 67
+							}
+						},
+						"config": {
+							"type": ".MergeReadConfig",
+							"failureOutputs": [],
+							"keyReferences": [
+								{
+									"location": "child",
+									"key": "Source1",
+									"reference": {
+										"type": "Instance",
+										"name": "CNC_Solution_CNC_Machine_Production_Data_Templated_Instance",
+										"path": "",
+										"params": {
+											"AssetID": "{{event.metadata.parameters.AssetID}}"
+										}
+									}
+								}
+							],
+							"inputValueLocation": "child",
+							"inputValueKey": "eventIn"
+						},
+						"outputs": [
+							"MergeObj"
+						]
+					},
+					{
+						"name": "SampleProductionCount",
+						"display": {
+							"position": {
+								"x": 690,
+								"y": 581
+							}
+						},
+						"config": {
+							"type": ".JavaScriptTransformConfig",
+							"transformExpression": "const sample = {\r\n\t\"value\": {\r\n\t\t\"value\": 250,\r\n\t\t\"_tagName\": \"2/1/Tutorial.CNC_Fanuc_1002.ProductionCount\",\r\n\t\t\"_tagQuality\": \"Good\",\r\n\t\t\"_tagTimestamp\": 1773607613197\r\n\t},\r\n\t\"metadata\": {\r\n\t\t\"source\": \"Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_ProductionCount_Templated({\\\"AssetID\\\":\\\"Fanuc_1002\\\",\\\"eventType\\\":\\\"ProductionCount\\\"})\"\r\n\t}\r\n};\r\nstage.setAllMetadata(sample.metadata)\r\nstage.setValue(sample.value)\r\n//event.value === 1? stage.setValue(sample.value): stage.stop();"
+						},
+						"outputs": [
+							"ParseSourceParameters"
+						]
+					},
+					{
+						"name": "SampleRejectCount",
+						"display": {
+							"position": {
+								"x": 690,
+								"y": 716
+							}
+						},
+						"config": {
+							"type": ".JavaScriptTransformConfig",
+							"transformExpression": "const sample = {\r\n\t\"value\": {\r\n\t\t\"value\": 250,\r\n\t\t\"_tagName\": \"2/1/Tutorial.CNC_Fanuc_1002.RejectCount\",\r\n\t\t\"_tagQuality\": \"Good\",\r\n\t\t\"_tagTimestamp\": 1773607613197\r\n\t},\r\n\t\"metadata\": {\r\n\t\t\"source\": \"Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_RejectCount_Templated({\\\"AssetID\\\":\\\"Fanuc_1002\\\",\\\"eventType\\\":\\\"RejectCount\\\"})\"\r\n\t}\r\n};\r\nstage.setAllMetadata(sample.metadata)\r\nstage.setValue(sample.value)\r\n//event.value === 1? stage.setValue(sample.value): stage.stop();"
+						},
+						"outputs": [
+							"ParseSourceParameters"
+						]
+					},
+					{
+						"name": "FilterEvent",
+						"display": {
+							"position": {
+								"x": 2040,
+								"y": 67
+							}
+						},
+						"config": {
+							"type": ".JavaScriptTransformConfig",
+							"transformExpression": "const input = event.value;\r\nconst cleaned = Object.fromEntries(\r\n  Object.entries(input).filter(([_, v]) => v !== null)\r\n);\r\n\r\nstage.setValue(cleaned);"
+						},
+						"outputs": [
+							"ReadInstance"
+						]
+					},
+					{
+						"name": "CheckDebug",
+						"display": {
+							"position": {
+								"x": 240,
+								"y": 0
+							}
+						},
+						"config": {
+							"type": ".SwitchConfig",
+							"switchCases": [
+								{
+									"expression": "return Boolean(event.metadata.source)",
+									"outputs": [
+										"ParseSourceParameters"
+									],
+									"description": "Value Is True"
+								},
+								{
+									"expression": "return true",
+									"outputs": [
+										"SampleMachineState",
+										"SamplePartProgramId",
+										"SampleProductionCount",
+										"SampleRejectCount",
+										"SampleToolId",
+										"ViewEvent"
+									],
+									"description": "Default"
+								}
+							],
+							"evaluationType": "onFirst"
+						},
+						"outputs": []
+					},
+					{
+						"name": "SampleToolId",
+						"display": {
+							"position": {
+								"x": 690,
+								"y": 851
+							}
+						},
+						"config": {
+							"type": ".JavaScriptTransformConfig",
+							"transformExpression": "const sample = {\r\n\t\"value\": {\r\n\t\t\"value\": \"TOOL01\",\r\n\t\t\"_tagName\": \"2/1/Tutorial.CNC_Fanuc_1002.ToolID\",\r\n\t\t\"_tagQuality\": \"Good\",\r\n\t\t\"_tagTimestamp\": 1773607441461\r\n\t},\r\n\t\"metadata\": {\r\n\t\t\"source\": \"Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_ToolID_Templated({\\\"AssetID\\\":\\\"Fanuc_1002\\\",\\\"eventType\\\":\\\"ToolID\\\"})\"\r\n\t}\r\n};\r\nstage.setAllMetadata(sample.metadata)\r\nstage.setValue(sample.value)\r\n//event.value === 1? stage.setValue(sample.value): stage.stop();"
+						},
+						"outputs": [
+							"ParseSourceParameters"
+						]
+					},
+					{
+						"name": "ModelEventData",
+						"display": {
+							"position": {
+								"x": 1590,
+								"y": 67
+							}
+						},
+						"config": {
+							"type": ".ModelConfig",
+							"model": "CNC_Machine_Production_Data_Model",
+							"objectName": "",
+							"initExpression": "",
+							"attributes": [
+								{
+									"name": "AssetID",
+									"expression": {
+										"type": "JavaScript",
+										"expression": "return event.metadata.parameters.AssetID;"
+									},
+									"defaultValue": ""
+								},
+								{
+									"name": "ProgramID",
+									"expression": {
+										"type": "JavaScript",
+										"expression": "if (event.metadata.parameters.eventType === \"PartProgramID\") return event.value;"
+									},
+									"defaultValue": null
+								},
+								{
+									"name": "ToolID",
+									"expression": {
+										"type": "JavaScript",
+										"expression": "if (event.metadata.parameters.eventType === \"ToolID\") return event.value;"
+									},
+									"defaultValue": null
+								},
+								{
+									"name": "MachineState",
+									"expression": {
+										"type": "JavaScript",
+										"expression": "if (event.metadata.parameters.eventType === \"MachineState\") return event.value;"
+									},
+									"defaultValue": null
+								},
+								{
+									"name": "ProductionCount",
+									"expression": {
+										"type": "JavaScript",
+										"expression": "if (event.metadata.parameters.eventType === \"ProductionCount\") return event.value;//? event.value : null;"
+									},
+									"defaultValue": null
+								},
+								{
+									"name": "RejectCount",
+									"expression": {
+										"type": "JavaScript",
+										"expression": "if (event.metadata.parameters.eventType === \"RejectCount\") return event.value;//? event.value : undefined;"
+									},
+									"defaultValue": null
+								}
+							]
+						},
+						"outputs": [
+							"FilterEvent"
+						]
+					},
+					{
+						"name": "SampleMachineState",
+						"display": {
+							"position": {
+								"x": 690,
+								"y": 311
+							}
+						},
+						"config": {
+							"type": ".JavaScriptTransformConfig",
+							"transformExpression": "const sample = {\r\n\t\"value\": {\r\n\t\t\"value\": \"RUNNING\",\r\n\t\t\"_tagName\": \"2/1/Tutorial.CNC_Fanuc_1003.MachineState\",\r\n\t\t\"_tagQuality\": \"Good\",\r\n\t\t\"_tagTimestamp\": 1773600686301\r\n\t},\r\n\t\"metadata\": {\r\n\t\t\"source\": \"Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_MachineState_Templated({\\\"AssetID\\\":\\\"Fanuc_1003\\\",\\\"eventType\\\":\\\"MachineState\\\"})\"\r\n\t}\r\n};\r\nstage.setAllMetadata(sample.metadata)\r\nstage.setValue(sample.value)\r\n//event.value === 1? stage.setValue(sample.value): stage.stop();"
+						},
+						"outputs": [
+							"ParseSourceParameters"
+						]
+					},
+					{
+						"name": "SamplePartProgramId",
+						"display": {
+							"position": {
+								"x": 690,
+								"y": 446
+							}
+						},
+						"config": {
+							"type": ".JavaScriptTransformConfig",
+							"transformExpression": "const sample = {\r\n\t\"value\": {\r\n\t\t\"value\": \"PROGRAM00\",\r\n\t\t\"_tagName\": \"2/1/Tutorial.CNC_Fanuc_1001.PartProgramID\",\r\n\t\t\"_tagQuality\": \"Good\",\r\n\t\t\"_tagTimestamp\": 1773607611197\r\n\t},\r\n\t\"metadata\": {\r\n\t\t\"source\": \"Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_PartProgramID_Templated({\\\"AssetID\\\":\\\"Fanuc_1001\\\",\\\"eventType\\\":\\\"PartProgramID\\\"})\"\r\n\t}\r\n};\r\nstage.setAllMetadata(sample.metadata)\r\nstage.setValue(sample.value)\r\n//event.value === 1? stage.setValue(sample.value): stage.stop();"
+						},
+						"outputs": [
+							"ParseSourceParameters"
+						]
+					},
+					{
+						"name": "ViewEvent",
+						"display": {
+							"position": {
+								"x": 690,
+								"y": 176
+							}
+						},
+						"config": {
+							"type": ".JavaScriptTransformConfig",
+							"transformExpression": "stage.setValue(event);"
+						},
+						"outputs": []
+					},
+					{
+						"name": "MqttPublishPayload",
+						"display": {
+							"position": {
+								"x": 3840,
+								"y": 67
+							}
+						},
+						"config": {
+							"type": ".DynamicWriteConfig",
+							"failureOutputs": [],
+							"connectionReference": "{{Connection.MQTT}}",
+							"qualifier": {
+								"topic": "modeledEvent/{{event.value.AssetID}}",
+								"qos": 0,
+								"namedRoot": false,
+								"retained": false,
+								"breakupArrays": false,
+								"type": "Tag"
+							},
+							"qualifierExpression": "",
+							"writeReturn": "completion"
+						},
+						"outputs": []
+					}
+				],
+				"trackActivity": true,
+				"triggers": [
+					{
+						"name": "MachineState",
+						"display": {
+							"position": {
+								"x": -450,
+								"y": -292
+							}
+						},
+						"config": {
+							"type": ".TriggerEvent",
+							"enabled": true,
+							"reference": "{{Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_MachineState_Templated}}"
+						}
+					},
+					{
+						"name": "ProductionCount",
+						"display": {
+							"position": {
+								"x": -450,
+								"y": -22
+							}
+						},
+						"config": {
+							"type": ".TriggerEvent",
+							"enabled": true,
+							"reference": "{{Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_ProductionCount_Templated}}"
+						}
+					},
+					{
+						"name": "ToolID",
+						"display": {
+							"position": {
+								"x": -450,
+								"y": 247
+							}
+						},
+						"config": {
+							"type": ".TriggerEvent",
+							"enabled": true,
+							"reference": "{{Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_ToolID_Templated}}"
+						}
+					},
+					{
+						"name": "RejectCount",
+						"display": {
+							"position": {
+								"x": -450,
+								"y": 112
+							}
+						},
+						"config": {
+							"type": ".TriggerEvent",
+							"enabled": true,
+							"reference": "{{Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_RejectCount_Templated}}"
+						}
+					},
+					{
+						"name": "PartProgramID",
+						"display": {
+							"position": {
+								"x": -450,
+								"y": -157
+							}
+						},
+						"config": {
+							"type": ".TriggerEvent",
+							"enabled": true,
+							"reference": "{{Connection.OPC_UA.Connection_OPC_UA_Input_CNC_Solution_Fanuc_CNC_PartProgramID_Templated}}"
+						}
+					}
+				],
+				"errorHandler": {
+					"type": "default"
+				}
+			}
+		],
+		"namespace": []
+	},
+	"network": {
+		"groups": [],
+		"hubs": []
+	}
+}
