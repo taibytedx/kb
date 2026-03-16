@@ -21,4 +21,4 @@ View the full payload get published when one of its various attributes gets a n
 
 ### Project File:
 
-Download link: configuration.json
+Download link: [configuration.json](https://github.com/taibytedx/kb/blob/main/drafts/event-driven-pipeline/intelligencehub-configuration.json)
